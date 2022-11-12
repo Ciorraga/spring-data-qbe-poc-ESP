@@ -59,7 +59,7 @@ public class SaleRestController{
 		ExampleMatcher matcher = ExampleMatcher.matching()
 				.withMatcher("product.name", match -> match.contains());
 //				.withMatcher("product.name", match -> match.endsWith())
-//				.withMatcher("product.name", match -> match.startsWith());
+//				.withMatcher("product.name", match -> match.startsWith())...;
 
 		List<Sale> sales = saleRepository.findAll(Example.of(sale, matcher));		
 		
@@ -67,4 +67,24 @@ public class SaleRestController{
 				? new ResponseEntity<>(sales, HttpStatus.OK) 
 						: new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+	
+	/**
+	 * QBE don't accept seeks whic are used to find ranges, numbers greather or less than or anidated seeks so,
+	 * we could use speceficitaions and mixing this with QBE
+	 * @param sale
+	 * @return
+	 */
+	@PostMapping("/searchWithQBEAndSpecification")
+	public ResponseEntity<List<Sale>> getAllSalesSearchWithProductNameContainsAndAmountGreater(@RequestBody Sale sale){
+		
+		ExampleMatcher matcher = ExampleMatcher.matching()
+				.withMatcher("product.name", match -> match.contains());
+
+		List<Sale> sales = saleRepository.findAll(Sale.buildPredicate(Example.of(sale, matcher)));		
+		
+		return !sales.isEmpty() 
+				? new ResponseEntity<>(sales, HttpStatus.OK) 
+						: new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+	
 }

@@ -3,6 +3,7 @@ package com.pocsma.qbe.app.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -10,9 +11,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.criteria.Predicate;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.domain.Example;
+import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -48,4 +53,14 @@ public class Sale implements Serializable{
 	@JsonManagedReference
 	@OneToMany(mappedBy = "sale")
     private List<OrderStatus> orderStatus;
+	
+	public static Specification<Sale> buildPredicate(Example<Sale> example){
+		return (root, query, builder) -> {
+			List<Predicate> predicateList  = new ArrayList<>();
+			predicateList.add(builder.and(QueryByExamplePredicateBuilder.getPredicate(root, builder, example)));
+			predicateList.add(builder.greaterThan(root.get("amount"), new BigDecimal("3000")));
+			return builder.and(predicateList.toArray(new Predicate[predicateList.size()]));
+		};
+	}
+	
 }
